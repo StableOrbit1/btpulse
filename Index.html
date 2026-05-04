@@ -1,1 +1,446 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Battle Pulse - League Infographic</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <style>
+        .custom-scrollbar::-webkit-scrollbar { width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+        body { background-color: #0f172a; } /* Slate 900 */
+        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
+    </style>
+</head>
+<body class="text-slate-200 font-sans min-h-screen p-4 md:p-8">
+
+    <div class="max-w-5xl mx-auto space-y-8">
+        
+        <!-- Header Section -->
+        <header class="glass-panel p-6 md:p-8 rounded-[2.5rem] flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
+            <div class="absolute -right-20 -top-20 w-64 h-64 bg-emerald-500/20 rounded-full blur-3xl pointer-events-none"></div>
+            
+            <div class="z-10 text-center md:text-left w-full md:w-auto">
+                <div class="flex flex-col md:flex-row items-center gap-4 mb-3">
+                    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/20 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em]">
+                        <i data-lucide="activity" class="w-3 h-3"></i> Battle Pulse
+                    </div>
+                    <!-- Week Selector Dropdown -->
+                    <select id="week-selector" onchange="window.changeWeek(this.value)" class="bg-slate-900/80 text-emerald-400 border border-emerald-500/30 rounded-xl px-4 py-1.5 text-xs font-black uppercase tracking-widest outline-none cursor-pointer hover:bg-slate-800 transition-colors">
+                        <!-- Populated by JS -->
+                    </select>
+                </div>
+                <h1 class="text-4xl md:text-5xl font-black tracking-tighter text-white">The <span class="text-emerald-500">Damage</span> Report</h1>
+                <p id="date-range-display" class="text-slate-400 font-bold uppercase tracking-widest text-xs mt-2">Loading...</p>
+            </div>
+            
+            <div class="z-10 flex gap-4 w-full md:w-auto justify-center">
+                <div class="text-center px-6 py-4 bg-slate-800/80 rounded-2xl border border-slate-700/50 shadow-inner flex-1 md:flex-none">
+                    <p class="text-[10px] uppercase tracking-widest font-black text-slate-400 mb-1">Tags Swapped</p>
+                    <p id="stat-swapped" class="text-4xl font-black text-emerald-400 animate-pulse">-</p>
+                </div>
+                <div class="text-center px-6 py-4 bg-slate-800/80 rounded-2xl border border-slate-700/50 shadow-inner flex-1 md:flex-none">
+                    <p class="text-[10px] uppercase tracking-widest font-black text-slate-400 mb-1">Battles Booked</p>
+                    <p id="stat-upcoming" class="text-4xl font-black text-amber-400 animate-pulse">-</p>
+                </div>
+            </div>
+        </header>
+
+        <!-- INSIGHTS SECTION -->
+        <section class="glass-panel p-6 md:p-8 rounded-[2.5rem] relative overflow-hidden">
+            <div class="flex items-center gap-3 border-b border-slate-700/50 pb-4 mb-6">
+                <div class="w-10 h-10 rounded-xl bg-sky-500/20 flex items-center justify-center text-sky-400">
+                    <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Timeline Insights</h2>
+                    <p id="insights-subtitle" class="text-[10px] font-bold text-sky-500 uppercase tracking-widest">Pre-Launch Hype Data</p>
+                </div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Busiest Day -->
+                <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-[1.5rem]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><i data-lucide="calendar-heart" class="w-4 h-4 text-rose-400"></i> Busiest Match Day</h3>
+                    <div id="insight-busiest-day" class="text-center py-2">
+                        <span class="text-slate-500 text-xs font-bold uppercase tracking-widest">Loading...</span>
+                    </div>
+                </div>
+
+                <!-- All Active Bookers -->
+                <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-[1.5rem]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><i data-lucide="flame" class="w-4 h-4 text-amber-400"></i> Active Bookers</h3>
+                    <div id="insight-top-bookers" class="space-y-2 max-h-32 overflow-y-auto custom-scrollbar pr-2">
+                        <div class="text-center py-2"><span class="text-slate-500 text-xs font-bold uppercase tracking-widest">Loading...</span></div>
+                    </div>
+                </div>
+
+                <!-- MIA List -->
+                <div class="bg-slate-800/50 border border-slate-700 p-5 rounded-[1.5rem]">
+                    <h3 class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 flex items-center gap-2"><i data-lucide="ghost" class="w-4 h-4 text-slate-500"></i> Yet to Book (MIA)</h3>
+                    <div id="insight-mia" class="flex flex-wrap gap-1.5 max-h-32 overflow-y-auto custom-scrollbar">
+                        <div class="text-center w-full py-2"><span class="text-slate-500 text-xs font-bold uppercase tracking-widest">Loading...</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- MATCH LISTS GRID -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <!-- THE AFTERMATH -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                        <i data-lucide="swords" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">The Aftermath</h2>
+                        <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Completed Matches</p>
+                    </div>
+                </div>
+                <div id="past-matches-container" class="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                    <div class="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Syncing database...</div>
+                </div>
+            </section>
+
+            <!-- THE HORIZON -->
+            <section class="space-y-6">
+                <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 flex items-center justify-center text-amber-400">
+                        <i data-lucide="calendar-clock" class="w-5 h-5"></i>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-black text-white tracking-tight">The Horizon</h2>
+                        <p class="text-[10px] font-bold text-amber-500 uppercase tracking-widest">Scheduled Battles</p>
+                    </div>
+                </div>
+                <div id="future-matches-container" class="space-y-4 max-h-[500px] overflow-y-auto custom-scrollbar pr-2">
+                    <div class="p-8 text-center text-slate-500 font-bold uppercase tracking-widest text-xs">Syncing database...</div>
+                </div>
+            </section>
+        </div>
+        
+        <!-- PAID UP TRACKER TABLE -->
+        <section class="space-y-6">
+            <div class="flex items-center gap-3 border-b border-slate-800 pb-4">
+                <div class="w-10 h-10 rounded-xl bg-emerald-500/20 flex items-center justify-center text-emerald-400">
+                    <i data-lucide="banknote" class="w-5 h-5"></i>
+                </div>
+                <div>
+                    <h2 class="text-2xl font-black text-white tracking-tight">Treasury Status</h2>
+                    <p class="text-[10px] font-bold text-emerald-500 uppercase tracking-widest">Live Paid Up Tracker</p>
+                </div>
+            </div>
+            
+            <div class="glass-panel overflow-hidden rounded-[2rem]">
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-px bg-slate-700/50" id="paid-tracker-container">
+                    <div class="p-8 col-span-full text-center text-slate-500 font-bold uppercase tracking-widest text-xs bg-slate-900/80">Syncing database...</div>
+                </div>
+            </div>
+        </section>
+
+        <footer class="text-center py-6 text-slate-600 text-[10px] font-black uppercase tracking-widest">
+            Generated via BattleTags Enterprise Database
+        </footer>
+
+    </div>
+
+    <!-- Firebase SDK 11.6.1 -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getFirestore, initializeFirestore, persistentLocalCache, collection, onSnapshot } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+        import { getAuth, signInAnonymously } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+
+        // --- FIREBASE CONFIGURATION ---
+        let firebaseConfig;
+        let activeAppId;
+        try {
+            firebaseConfig = JSON.parse(__firebase_config);
+            activeAppId = typeof __app_id !== 'undefined' ? __app_id : 'friday-harbour-battle-tags';
+        } catch (e) {
+            firebaseConfig = {
+                apiKey: "AIzaSyDf_1RE4hscqVVbHoN7Vvqoylj8elWLUn4",
+                authDomain: "battletags-27390.firebaseapp.com",
+                projectId: "battletags-27390",
+                storageBucket: "battletags-27390.firebasestorage.app",
+                messagingSenderId: "930795580018",
+                appId: "1:930795580018:web:b82b95d64572483f85f0eb"
+            };
+            activeAppId = 'friday-harbour-battle-tags';
+        }
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        let db;
+        try { db = initializeFirestore(app, { localCache: persistentLocalCache() }); } 
+        catch (e) { db = getFirestore(app); }
+
+        lucide.createIcons();
+
+        // --- GLOBAL STATE ---
+        let globalMatches = [];
+        let globalPlayers = [];
+        let selectedWeekIndex = 0;
+        const weeks = [];
+
+        // --- GENERATE WEEKS ---
+        function generateWeeks() {
+            // Week 0 is Pre-Launch
+            weeks.push({ 
+                label: "Pre-Launch (Hype)", 
+                start: "2026-01-01", 
+                end: "2026-04-30" 
+            });
+
+            let currentStart = new Date("2026-05-01T00:00:00-04:00");
+            for (let i = 1; i <= 24; i++) {
+                let end = new Date(currentStart);
+                end.setDate(end.getDate() + 6);
+                
+                const sStr = currentStart.toISOString().split('T')[0];
+                const eStr = end.toISOString().split('T')[0];
+                const sLabel = currentStart.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+                const eLabel = end.toLocaleDateString('en-US', {month:'short', day:'numeric'});
+
+                weeks.push({
+                    label: `Week ${i}: ${sLabel} - ${eLabel}`,
+                    start: sStr,
+                    end: eStr
+                });
+                currentStart.setDate(currentStart.getDate() + 7);
+            }
+
+            // Determine initial week based on current date
+            const todayStr = new Date().toISOString().split('T')[0];
+            let foundIndex = 0;
+            for (let i = 1; i < weeks.length; i++) {
+                if (todayStr >= weeks[i].start && todayStr <= weeks[i].end) {
+                    foundIndex = i;
+                    break;
+                }
+            }
+            selectedWeekIndex = foundIndex;
+
+            // Populate Dropdown
+            const selectEl = document.getElementById('week-selector');
+            weeks.forEach((w, index) => {
+                const opt = new Option(w.label, index);
+                if (index === selectedWeekIndex) opt.selected = true;
+                selectEl.add(opt);
+            });
+        }
+
+        // Global dropdown handler
+        window.changeWeek = function(indexStr) {
+            selectedWeekIndex = parseInt(indexStr);
+            renderPulse();
+        };
+
+        // --- INIT SYNC ---
+        async function init() {
+            generateWeeks();
+            try {
+                await signInAnonymously(auth);
+                listenToData();
+            } catch (err) {
+                console.error("Connection failed:", err);
+            }
+        }
+
+        function listenToData() {
+            const mQuery = collection(db, 'artifacts', activeAppId, 'public', 'data', 'matches');
+            onSnapshot(mQuery, (snapshot) => {
+                globalMatches = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+                renderPulse();
+            });
+
+            const pQuery = collection(db, 'artifacts', activeAppId, 'public', 'data', 'players');
+            onSnapshot(pQuery, (snapshot) => {
+                globalPlayers = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() })).sort((a,b) => a.name.localeCompare(b.name));
+                renderPulse();
+            });
+        }
+
+        function renderPulse() {
+            if (globalPlayers.length === 0 && globalMatches.length === 0) return; // Wait for initial sync
+
+            const currentWeek = weeks[selectedWeekIndex];
+            
+            // Format dates for header display
+            const dStart = new Date(currentWeek.start + "T12:00:00");
+            const dEnd = new Date(currentWeek.end + "T12:00:00");
+            const displayFormat = { month: 'short', day: 'numeric', year: 'numeric' };
+            document.getElementById('date-range-display').innerText = 
+                selectedWeekIndex === 0 
+                ? "Pre-Season Booking Snapshot" 
+                : `Timeframe: ${dStart.toLocaleDateString('en-US', displayFormat)} — ${dEnd.toLocaleDateString('en-US', displayFormat)}`;
+
+            // Update Subtitle
+            document.getElementById('insights-subtitle').innerText = selectedWeekIndex === 0 ? "Pre-Launch Hype Data" : `Stats for ${currentWeek.label.split(':')[0]}`;
+
+            // --- FILTER MATCHES FOR THE LISTS ---
+            // If Pre-Launch (index 0), show ALL completed matches and ALL future scheduled matches.
+            const pastMatches = globalMatches.filter(m => 
+                m.status === 'completed' && 
+                (selectedWeekIndex === 0 || (m.date >= currentWeek.start && m.date <= currentWeek.end))
+            ).sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            const futureMatches = globalMatches.filter(m => 
+                m.status === 'scheduled' && 
+                (selectedWeekIndex === 0 || (m.scheduledDate >= currentWeek.start && m.scheduledDate <= currentWeek.end))
+            ).sort((a, b) => new Date(a.scheduledDate) - new Date(b.scheduledDate));
+
+            // --- FILTER MATCHES FOR INSIGHTS ---
+            const insightMatches = futureMatches;
+
+            // 1. Calculate Busiest Day
+            const dayCounts = {};
+            insightMatches.forEach(m => {
+                dayCounts[m.scheduledDate] = (dayCounts[m.scheduledDate] || 0) + 1;
+            });
+            const sortedDays = Object.entries(dayCounts).sort((a,b) => b[1] - a[1]);
+            const busiestDay = sortedDays.length > 0 ? sortedDays[0] : null;
+
+            if (busiestDay) {
+                const bDate = new Date(busiestDay[0] + "T12:00:00").toLocaleDateString('en-US', {weekday: 'long', month: 'short', day: 'numeric'});
+                document.getElementById('insight-busiest-day').innerHTML = `
+                    <div class="text-3xl font-black text-rose-400 mb-1">${busiestDay[1]} <span class="text-sm text-slate-500 uppercase tracking-widest">Matches</span></div>
+                    <div class="text-[10px] font-bold text-white uppercase tracking-widest bg-slate-700/50 inline-block px-3 py-1 rounded-full">${bDate}</div>
+                `;
+            } else {
+                document.getElementById('insight-busiest-day').innerHTML = `<span class="text-slate-600 text-xs font-bold uppercase tracking-widest">No matches booked</span>`;
+            }
+
+            // 2. Calculate Active Bookers & MIA
+            const playerCounts = {};
+            globalPlayers.forEach(p => playerCounts[p.name] = 0);
+            insightMatches.forEach(m => {
+                if (playerCounts[m.player1] !== undefined) playerCounts[m.player1]++;
+                if (playerCounts[m.player2] !== undefined) playerCounts[m.player2]++;
+            });
+            
+            const sortedBookers = Object.entries(playerCounts).sort((a,b) => b[1] - a[1] || a[0].localeCompare(b[0]));
+            
+            // All Active Bookers
+            const activeBookers = sortedBookers.filter(b => b[1] > 0);
+            const topBookersHtml = activeBookers.length > 0 ? activeBookers.map((b, i) => `
+                <div class="flex items-center justify-between bg-slate-900/50 p-2 rounded-xl border border-slate-700/50">
+                    <span class="text-xs font-bold text-white uppercase tracking-tight flex items-center gap-2">
+                        <span class="text-amber-500 font-black">${i === 0 ? '👑' : i+1+'.'}</span> ${b[0]}
+                    </span>
+                    <span class="text-[10px] font-black bg-amber-500/20 text-amber-400 px-2 py-0.5 rounded-md">${b[1]} Booked</span>
+                </div>
+            `).join('') : `<span class="text-slate-600 text-xs font-bold uppercase tracking-widest block text-center mt-4">No data yet</span>`;
+            document.getElementById('insight-top-bookers').innerHTML = topBookersHtml;
+
+            // MIA
+            const miaPlayers = sortedBookers.filter(b => b[1] === 0).map(b => b[0]);
+            const miaHtml = miaPlayers.length > 0 ? miaPlayers.map(name => `
+                <span class="text-[9px] font-bold text-slate-400 bg-slate-900/50 border border-slate-700/50 px-2 py-1 rounded-md uppercase tracking-wider">${name}</span>
+            `).join('') : `<span class="text-emerald-500 text-xs font-bold uppercase tracking-widest block text-center w-full mt-4">Everyone is playing!</span>`;
+            document.getElementById('insight-mia').innerHTML = miaHtml;
+
+
+            // --- UPDATE HEADER STATS ---
+            document.getElementById('stat-swapped').innerText = pastMatches.length;
+            document.getElementById('stat-swapped').classList.remove('animate-pulse');
+            document.getElementById('stat-upcoming').innerText = futureMatches.length;
+            document.getElementById('stat-upcoming').classList.remove('animate-pulse');
+
+            // --- RENDER MATCH LISTS ---
+            const pastContainer = document.getElementById('past-matches-container');
+            if (pastMatches.length === 0) {
+                pastContainer.innerHTML = `
+                    <div class="glass-panel p-8 rounded-3xl text-center border-dashed border-slate-700/50">
+                        <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">No tags captured in this timeframe.</p>
+                    </div>`;
+            } else {
+                pastContainer.innerHTML = pastMatches.map(m => {
+                    const photoHtml = m.photoUrl ? `
+                        <div class="w-16 h-16 shrink-0 rounded-xl overflow-hidden border-2 border-emerald-500/30">
+                            <img src="${m.photoUrl}" alt="Evidence" class="w-full h-full object-cover">
+                        </div>
+                    ` : `
+                        <div class="w-16 h-16 shrink-0 rounded-xl bg-slate-800/50 flex items-center justify-center border border-slate-700">
+                            <i data-lucide="camera-off" class="w-5 h-5 text-slate-600"></i>
+                        </div>
+                    `;
+
+                    return `
+                    <div class="glass-panel p-5 rounded-[2rem] flex items-center gap-5 relative overflow-hidden group hover:border-emerald-500/50 transition-colors">
+                        <div class="absolute top-0 bottom-0 left-0 w-1 bg-emerald-500"></div>
+                        ${photoHtml}
+                        <div class="flex-1">
+                            <div class="flex justify-between items-start mb-1">
+                                <span class="text-[9px] font-black text-emerald-400 uppercase tracking-widest bg-emerald-500/10 px-2 py-0.5 rounded-md"><i data-lucide="calendar" class="w-3 h-3 inline pb-0.5"></i> ${m.date}</span>
+                                <span class="text-[10px] font-black text-emerald-500 tracking-wider">${m.score}</span>
+                            </div>
+                            <h3 class="text-lg font-black text-white tracking-tight uppercase">${m.winner} <span class="text-emerald-500 text-sm font-bold lowercase mx-1">def.</span> ${m.loser}</h3>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+
+            const futureContainer = document.getElementById('future-matches-container');
+            if (futureMatches.length === 0) {
+                futureContainer.innerHTML = `
+                    <div class="glass-panel p-8 rounded-3xl text-center border-dashed border-slate-700/50">
+                        <p class="text-slate-500 font-bold uppercase tracking-widest text-xs">No battles scheduled for this timeframe.</p>
+                    </div>`;
+            } else {
+                const todayStr = new Date().toISOString().split('T')[0];
+                futureContainer.innerHTML = futureMatches.map(m => {
+                    const isToday = m.scheduledDate === todayStr;
+                    const dateBadgeClass = isToday ? 'bg-rose-500/20 text-rose-400 border border-rose-500/30' : 'bg-amber-500/10 text-amber-400';
+                    const dateIcon = isToday ? 'alert-circle' : 'calendar-clock';
+                    const dateText = isToday ? 'TODAY' : m.scheduledDate;
+                    
+                    return `
+                    <div class="glass-panel p-5 rounded-[2rem] flex items-center justify-between relative overflow-hidden hover:border-amber-500/50 transition-colors">
+                        <div class="absolute top-0 bottom-0 left-0 w-1 bg-amber-500"></div>
+                        <div class="text-left">
+                            <div class="mb-2 inline-block">
+                                <span class="text-[9px] font-black uppercase tracking-widest px-2 py-0.5 rounded-md ${dateBadgeClass}">
+                                    <i data-lucide="${dateIcon}" class="w-3 h-3 inline pb-0.5"></i> ${dateText}
+                                </span>
+                            </div>
+                            <h3 class="text-lg font-black text-white tracking-tight uppercase">${m.player1} <span class="text-slate-500 text-sm font-bold lowercase mx-1">vs</span> ${m.player2}</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center shadow-inner border border-slate-700 text-slate-500">
+                            <span class="text-lg drop-shadow-md">⚔️</span>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+
+            // --- RENDER PAID UP TRACKER ---
+            const trackerContainer = document.getElementById('paid-tracker-container');
+            if (globalPlayers.length === 0) {
+                trackerContainer.innerHTML = `<div class="p-8 col-span-full text-center text-slate-500 font-bold uppercase tracking-widest text-xs bg-slate-900/80">No players found in database.</div>`;
+            } else {
+                trackerContainer.innerHTML = globalPlayers.map(p => {
+                    const isPaid = p.paid === 'Y';
+                    const statusClass = isPaid ? 'text-emerald-400 bg-emerald-500/10' : 'text-rose-400 bg-rose-500/10';
+                    const statusText = isPaid ? 'PAID' : 'UNPAID';
+                    const icon = isPaid ? 'check' : 'x';
+                    
+                    return `
+                    <div class="bg-slate-900/80 p-4 flex items-center justify-between hover:bg-slate-800/80 transition-colors">
+                        <span class="text-xs font-bold text-slate-200 uppercase tracking-tight">${p.name}</span>
+                        <span class="flex items-center gap-1 ${statusClass} px-2 py-1 rounded border border-transparent ${!isPaid ? 'border-rose-500/20' : ''} text-[9px] font-black uppercase tracking-widest">
+                            <i data-lucide="${icon}" class="w-3 h-3"></i> ${statusText}
+                        </span>
+                    </div>
+                `}).join('');
+            }
+
+            lucide.createIcons();
+        }
+
+        init();
+    </script>
+</body>
+</html>
